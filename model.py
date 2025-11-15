@@ -1,7 +1,6 @@
 import os
 
-from sqlalchemy import Integer, Column, String, ARRAY, JSON
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Integer, String, JSON
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, MappedColumn, mapped_column
 
@@ -11,7 +10,10 @@ POSTGRES_DB = os.getenv("POSTGRES_DB", "swapi")
 POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5431")
 
-PG_DSN = f'postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@"{POSTGRES_HOST}:{POSTGRES_PORT}/'
+PG_DSN = (
+    f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@"
+    f"{POSTGRES_HOST}:{POSTGRES_PORT}/"
+)
 
 engine = create_async_engine(PG_DSN)
 Session = async_sessionmaker(bind=engine, expire_on_commit=False)
@@ -30,6 +32,10 @@ class SwapiPeople(Base):
     mass: MappedColumn[str] = mapped_column(String)
     name: MappedColumn[str] = mapped_column(String)
     skin_color: MappedColumn[str] = mapped_column(String)
+
+async def drop_db_table():
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.drop_all)
 
 async def init_orm():
     async with engine.begin() as connection:
