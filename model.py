@@ -1,6 +1,6 @@
 import os
 
-from sqlalchemy import Integer, String, JSON
+from sqlalchemy import Integer, String, JSON, ARRAY
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, MappedColumn, mapped_column
 
@@ -22,16 +22,21 @@ class Base(DeclarativeBase, AsyncAttrs):
     pass
 
 class SwapiPeople(Base):
-    __tablename__ = 'swapi_people'
+    __tablename__ = 'swapi_people_all'
     id: MappedColumn[int] = mapped_column(Integer, primary_key=True)
     birth_year: MappedColumn[str] = mapped_column(String)
     eye_color: MappedColumn[str] = mapped_column(String)
+    films: MappedColumn[list[str] | None] = mapped_column(ARRAY(String))
     gender: MappedColumn[str] = mapped_column(String)
     hair_color: MappedColumn[str] = mapped_column(String)
+    height: MappedColumn[str] = mapped_column(String)
     homeworld: MappedColumn[str] = mapped_column(String)
     mass: MappedColumn[str] = mapped_column(String)
     name: MappedColumn[str] = mapped_column(String)
     skin_color: MappedColumn[str] = mapped_column(String)
+    species: MappedColumn[list[str] | None] = mapped_column(ARRAY(String))
+    starships: MappedColumn[list[str] | None] = mapped_column(ARRAY(String))
+    vehicles: MappedColumn[list[str] | None] = mapped_column(ARRAY(String))
 
 async def drop_db_table():
     async with engine.begin() as connection:
