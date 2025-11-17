@@ -14,7 +14,6 @@ async def get_people(person_id, http_session):
     json_data = await response.json()
     return json_data
 
-
 async def insert_people(people_data: list[dict]):
     async with Session() as session:
         insert_list = []
@@ -37,28 +36,20 @@ async def insert_people(people_data: list[dict]):
                                             vehicles=people.get('vehicles')
                                             )
                 insert_list.append(people_object)
-            # session.add(swapi_person)
-        # orm_people = [SwapiPeople(json=person) for person in people_data]
-        # session.add_all(orm_people)
         session.add_all(insert_list)
         await session.commit()
 
 async def get_info(client, url: str):
-    """Функция получает данные по url"""
-
     async with client.get(f'{url}') as response:
         json_data = await response.json()
         return json_data
 
 async def load_attribute(client, url_list: list):
-    """Функция получает дополнительные данные по персонажу"""
     attribute_list_cor = [get_info(client, url) for url in url_list]
     get_attribute = await asyncio.gather(*attribute_list_cor)
     return get_attribute
 
-
 async def additional_load_info(client, people_list: list):
-    """Функция заменяет ссылки на дополнительные данные по персонажу"""
     new_dict = {}
     del_list = []
     for people in people_list:
@@ -87,13 +78,13 @@ async def additional_load_info(client, people_list: list):
     pprint(people_list)
     return people_list
 
-async def main():
+async def main(quantity: int):
     await drop_db_table()
     await init_orm()
 
     tasks = []
     async with aiohttp.ClientSession() as client:
-        people_ids = range(1, 101)
+        people_ids = range(1, quantity + 1)
         for people_ids_chunk in chunked(people_ids, MAX_REQUESTS):
             coros = [get_people(i, client) for i in people_ids_chunk]
             results = await asyncio.gather(*coros)
@@ -107,12 +98,10 @@ async def main():
     tasks = asyncio.all_tasks()
     main_task = asyncio.current_task()
     tasks.remove(main_task)
-    # await asyncio.gather(*tasks)
     for task in tasks:
         await task
 
-
 if __name__ == '__main__':
     start = datetime.datetime.now()
-    asyncio.run(main())
+    asyncio.run(main(100))
     print(datetime.datetime.now() - start)
